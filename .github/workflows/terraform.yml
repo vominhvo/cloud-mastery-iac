@@ -52,7 +52,7 @@ jobs:
 
     # Generates an execution plan for Terraform
     - name: Terraform Plan
-      run: terraform plan --var-file=${{ENVIRONMENT_TFVARS}}
+      run: terraform plan --var-file=${{env.ENVIRONMENT_TFVARS}}
       working-directory: ${{env.ROOT_PATH}}
 
   terraform_apply:
@@ -81,6 +81,6 @@ jobs:
 
       #github.ref == 'refs/heads/main' && github.event_name == 'push'
     - name: Terraform Apply
-      run: terraform apply -auto-approve --var-file=${{ENVIRONMENT_TFVARS}}
+      run: terraform apply -auto-approve --var-file=${{env.ENVIRONMENT_TFVARS}}
       if: ${{inputs.tf_destroy}} == false
       working-directory: ${{ env.ROOT_PATH }}
