@@ -1,0 +1,86 @@
+name: 'Terraform'
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches:
+    - main
+env:
+  ARM_CLIENT_ID: ${{secrets.AZURE_CLIENT_ID}}
+  ARM_CLIENT_SECRET: ${{secrets.AZURE_CLIENT_SECRET}}
+  ARM_SUBSCRIPTION_ID: ${{secrets.AZURE_SUBSCRIPTION_ID}}
+  ARM_TENANT_ID: ${{secrets.AZURE_TENANT_ID}}
+  ROOT_PATH: '${{github.workspace}}'
+  ENVIRONMENT_TFVARS: '${{github.workspace}}/environment/dev.tfvars'
+
+jobs:
+  terraform_plan:
+    name: 'terraform plan'
+    runs-on: ubuntu-latest
+
+    # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+    # Checkout the repository to the GitHub Actions runner
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    # Install the latest version of Terraform CLI and configure the Terraform CLI configuration file with a Terraform Cloud user API token
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v1
+      with:
+        terraform_version: 1.7.3
+
+    # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
+    - name: Terraform Init
+      run: terraform init
+      working-directory: ${{env.ROOT_PATH}}
+
+    # Checks that all Terraform configuration files adhere to a canonical format
+    - name: Terraform Format
+      run: terraform fmt -check
+      working-directory: ${{env.ROOT_PATH}}
+
+    # Validate all terraform configuation files
+    - name: Terraform Validate
+      run: terraform validate
+      working-directory: ${{env.ROOT_PATH}}
+
+    # Generates an execution plan for Terraform
+    - name: Terraform Plan
+      run: terraform plan --var-file=${{env.ENVIRONMENT_TFVARS}}
+      working-directory: ${{env.ROOT_PATH}}
+
+  terraform_apply:
+    name: 'Terraform Apply'
+    if: github.ref == 'refs/heads/main'
+    needs: [terraform_plan]
+    runs-on: ubuntu-latest
+    environment: dev
+    
+    defaults:
+      run:
+        shell: bash
+
+    steps:    
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v1
+      with:
+        terraform_version: 1.7.3
+ 
+    - name: Terraform Init
+      run: terraform init
+      working-directory: ${{ env.ROOT_PATH }}
+
+      #github.ref == 'refs/heads/main' && github.event_name == 'push'
+    - name: Terraform Apply
+      run: terraform apply -auto-approve --var-file=${{env.ENVIRONMENT_TFVARS}}
+      if: ${{inputs.tf_destroy}} == false
+      working-directory: ${{ env.ROOT_PATH }}
