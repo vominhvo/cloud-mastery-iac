@@ -86,7 +86,7 @@ key_vault_combined_vars = {
   notify_before_expiry         = "P90D"
 }
 key_permissions     = ["List", "Create", "Delete", "Get", "Purge", "Recover", "Update", "GetRotationPolicy", "SetRotationPolicy"]
-secret_permissions  = ["Get", "List", "Set"]
+secret_permissions  = ["Get", "List", "Set", "Delete", "Recover", "Backup", "Restore", "Purge"]
 storage_permissions = ["Get", "List"]
 key_opts = [
   "decrypt",
