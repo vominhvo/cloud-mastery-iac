@@ -20,17 +20,17 @@ resource "azurerm_user_assigned_identity" "user_assigned_identity" {
 }
 
 #config virtual network
-module "network" {
-  source              = "./modules/network"
-  project_name        = local.project_name
-  environment         = local.environment
-  location            = local.location
-  instance_count      = local.instance_count
-  resource_group_name = azurerm_resource_group.this.name
-  combined_vars       = var.vnet_combined_vars
-  list_subnet         = var.list_subnet
-  virtual_ip_address  = var.virtual_ip_address
-}
+# module "network" {
+#   source              = "./modules/network"
+#   project_name        = local.project_name
+#   environment         = local.environment
+#   location            = local.location
+#   instance_count      = local.instance_count
+#   resource_group_name = azurerm_resource_group.this.name
+#   combined_vars       = var.vnet_combined_vars
+#   list_subnet         = var.list_subnet
+#   virtual_ip_address  = var.virtual_ip_address
+# }
 
 # config cosmosDB
 # module "cosmosDB" {
@@ -45,46 +45,46 @@ module "network" {
 # }
 
 #config keyvault
-module "key_vault" {
-  source              = "./modules/key-vaults"
-  project_name        = local.project_name
-  environment         = local.environment
-  location            = local.location
-  instance_count      = local.instance_count
-  resource_group_name = azurerm_resource_group.this.name
-  tenant_id           = data.azurerm_client_config.current.tenant_id
-  object_id           = data.azurerm_client_config.current.object_id
-  combined_vars       = var.key_vault_combined_vars
-  key_opts            = var.key_opts
-  key_permissions     = var.key_permissions
-  secret_permissions  = var.secret_permissions
-  storage_permissions = var.storage_permissions
-}
+# module "key_vault" {
+#   source              = "./modules/key-vaults"
+#   project_name        = local.project_name
+#   environment         = local.environment
+#   location            = local.location
+#   instance_count      = local.instance_count
+#   resource_group_name = azurerm_resource_group.this.name
+#   tenant_id           = data.azurerm_client_config.current.tenant_id
+#   object_id           = data.azurerm_client_config.current.object_id
+#   combined_vars       = var.key_vault_combined_vars
+#   key_opts            = var.key_opts
+#   key_permissions     = var.key_permissions
+#   secret_permissions  = var.secret_permissions
+#   storage_permissions = var.storage_permissions
+# }
 
-# config service bus
-module "service_bus" {
-  source              = "./modules/service-bus"
-  project_name        = local.project_name
-  environment         = local.environment
-  location            = local.location
-  instance_count      = local.instance_count
-  resource_group_name = azurerm_resource_group.this.name
-  combined_vars       = var.service_bus_combined_vars
-}
+# # config service bus
+# module "service_bus" {
+#   source              = "./modules/service-bus"
+#   project_name        = local.project_name
+#   environment         = local.environment
+#   location            = local.location
+#   instance_count      = local.instance_count
+#   resource_group_name = azurerm_resource_group.this.name
+#   combined_vars       = var.service_bus_combined_vars
+# }
 
-#config account service
-module "account_service" {
-  source                        = "./modules/app-services"
-  project_name                  = local.project_name
-  environment                   = local.environment
-  location                      = local.location
-  instance_count                = local.instance_count
-  resource_group_name           = azurerm_resource_group.this.name
-  user_assigned_identity_id     = azurerm_user_assigned_identity.user_assigned_identity.id
-  # cosmosdb_account_id           = module.cosmosDB.cosmosdb_account_id
-  cosmosdb_account_id           = ""
-  combined_vars                 = var.account_app_service_combined_vars
-  service_plan_id               = ""
-  service_bus_connection_string = module.service_bus.primary_connection_string
-  subnet_id                     = module.network.subnet1_id
-}
+# #config account service
+# module "account_service" {
+#   source                        = "./modules/app-services"
+#   project_name                  = local.project_name
+#   environment                   = local.environment
+#   location                      = local.location
+#   instance_count                = local.instance_count
+#   resource_group_name           = azurerm_resource_group.this.name
+#   user_assigned_identity_id     = azurerm_user_assigned_identity.user_assigned_identity.id
+#   # cosmosdb_account_id           = module.cosmosDB.cosmosdb_account_id
+#   cosmosdb_account_id           = ""
+#   combined_vars                 = var.account_app_service_combined_vars
+#   service_plan_id               = ""
+#   service_bus_connection_string = module.service_bus.primary_connection_string
+#   subnet_id                     = module.network.subnet1_id
+# }
