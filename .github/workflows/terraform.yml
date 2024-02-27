@@ -18,7 +18,7 @@ jobs:
   terraform_plan:
     name: 'terraform plan'
     runs-on: ubuntu-latest
-
+    environment: develop
     # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
     defaults:
       run:
@@ -60,7 +60,7 @@ jobs:
     if: github.ref == 'refs/heads/main'
     needs: [terraform_plan]
     runs-on: ubuntu-latest
-    environment: dev
+    environment: develop
     
     defaults:
       run:
