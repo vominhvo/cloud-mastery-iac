@@ -105,3 +105,16 @@ service_bus_combined_vars = {
   service_bus_queue_profile     = "core"
   sku_name                      = "Standard"
 }
+
+#aks
+aks_combined_vars = {
+  azure_kubernetes_abbrevation = "aks"
+  azure_kubernetes_profile     = "core"
+  dns_prefix                   = "dnsakscluster"
+  default_node_pool_name       = "default_node_pool"
+  node_count                   = 1
+  vm_size                      = "Standard_B2s"
+  identity_type                = "UserAssigned"
+  node_pool_abbrevation        = "np"
+  node_pool_profile            = "core"
+}

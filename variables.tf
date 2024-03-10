@@ -146,3 +146,18 @@ variable "service_bus_combined_vars" {
     sku_name                      = ""
   }
 }
+
+#aks
+variable "aks_combined_vars" {
+  type = map(string)
+  default = {
+    azure_kubernetes_abbrevation = ""
+    azure_kubernetes_profile     = ""
+    dns_prefix                   = ""
+    default_node_pool_name       = ""
+    node_count                   = 1
+    vm_size                      = ""
+    identity_type                = ""
+  }
+
+}
