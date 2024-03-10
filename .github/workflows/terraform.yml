@@ -198,7 +198,7 @@ jobs:
   terraform_apply_prod:
     if: github.ref == 'refs/heads/main'
     name: 'Terraform Apply Prod'
-    needs: [terraform_plan_test]
+    needs: [terraform_plan_prod]
     runs-on: ubuntu-latest
     environment: develop
     
