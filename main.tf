@@ -20,17 +20,17 @@ resource "azurerm_user_assigned_identity" "user_assigned_identity" {
 }
 
 #config virtual network
-# module "network" {
-#   source              = "./modules/network"
-#   project_name        = local.project_name
-#   environment         = local.environment
-#   location            = local.location
-#   instance_count      = local.instance_count
-#   resource_group_name = azurerm_resource_group.this.name
-#   combined_vars       = var.vnet_combined_vars
-#   list_subnet         = var.list_subnet
-#   virtual_ip_address  = var.virtual_ip_address
-# }
+module "network" {
+  source              = "./modules/network"
+  project_name        = local.project_name
+  environment         = local.environment
+  location            = local.location
+  instance_count      = local.instance_count
+  resource_group_name = azurerm_resource_group.this.name
+  combined_vars       = var.vnet_combined_vars
+  list_subnet         = var.list_subnet
+  virtual_ip_address  = var.virtual_ip_address
+}
 
 # config cosmosDB
 # module "cosmosDB" {
@@ -61,7 +61,7 @@ resource "azurerm_user_assigned_identity" "user_assigned_identity" {
 #   storage_permissions = var.storage_permissions
 # }
 
-# # config service bus
+# config service bus
 # module "service_bus" {
 #   source              = "./modules/service-bus"
 #   project_name        = local.project_name
@@ -72,19 +72,37 @@ resource "azurerm_user_assigned_identity" "user_assigned_identity" {
 #   combined_vars       = var.service_bus_combined_vars
 # }
 
-# #config account service
+#config account service
 # module "account_service" {
-#   source                        = "./modules/app-services"
-#   project_name                  = local.project_name
-#   environment                   = local.environment
-#   location                      = local.location
-#   instance_count                = local.instance_count
-#   resource_group_name           = azurerm_resource_group.this.name
-#   user_assigned_identity_id     = azurerm_user_assigned_identity.user_assigned_identity.id
+#   source                    = "./modules/app-services"
+#   project_name              = local.project_name
+#   environment               = local.environment
+#   location                  = local.location
+#   instance_count            = local.instance_count
+#   resource_group_name       = azurerm_resource_group.this.name
+#   user_assigned_identity_id = azurerm_user_assigned_identity.user_assigned_identity.id
+#   cosmosdb_account_id       = ""
 #   # cosmosdb_account_id           = module.cosmosDB.cosmosdb_account_id
-#   cosmosdb_account_id           = ""
 #   combined_vars                 = var.account_app_service_combined_vars
 #   service_plan_id               = ""
 #   service_bus_connection_string = module.service_bus.primary_connection_string
 #   subnet_id                     = module.network.subnet1_id
+# }
+
+#config k8s cluster
+module "kubernetes" {
+  source                 = "./modules/kubernetes"
+  location               = local.location
+  resource_group_name    = azurerm_resource_group.this.name
+  project_name           = local.project_name
+  environment            = local.environment
+  combined_vars          = var.aks_combined_vars
+  user_assigned_identity = azurerm_user_assigned_identity.user_assigned_identity.id
+}
+# module "k8s" {
+#   source                 = "./modules/k8s"
+#   host                   = module.kubernetes.host
+#   client_certificate     = base64decode(module.kubernetes.client_certificate)
+#   client_key             = base64decode(module.kubernetes.client_key)
+#   cluster_ca_certificate = base64decode(module.kubernetes.cluster_ca_certificate)
 # }

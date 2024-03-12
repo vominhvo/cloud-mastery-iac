@@ -147,17 +147,22 @@ variable "service_bus_combined_vars" {
   }
 }
 
-#aks
 variable "aks_combined_vars" {
   type = map(string)
   default = {
-    azure_kubernetes_abbrevation = ""
-    azure_kubernetes_profile     = ""
-    dns_prefix                   = ""
-    default_node_pool_name       = ""
-    node_count                   = 1
-    vm_size                      = ""
-    identity_type                = ""
+    aks_abbrevation           = ""
+    aks_profile               = ""
+    vm_size                   = ""
+    node_count                = ""
+    aks_dns_prefix            = ""
+    aks_identity_type         = ""
+    network_plugin            = ""
+    kubernetes_instance_count = ""
+    node_pool_instance_count  = ""
+    node_pool_profile         = ""
+    node_pool_abbrevation     = ""
+    default_node_name         = ""
+    node_pool_name            = ""
+    node_priority             = ""
   }
-
 }
