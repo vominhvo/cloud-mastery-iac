@@ -1,7 +1,7 @@
 #local
 project_name   = "topx"
 environment    = "dev"
-region         = "eastasia"
+region         = "westus3"
 instance_count = "001"
 
 #resource group
@@ -104,4 +104,21 @@ service_bus_combined_vars = {
   service_bus_queue_abbrevation = "sbq"
   service_bus_queue_profile     = "core"
   sku_name                      = "Standard"
+}
+
+#aks
+aks_combined_vars = {
+  aks_abbrevation           = "aks"
+  aks_profile               = "core"
+  kubernetes_instance_count = 1
+  vm_size                   = "standard_b2s"
+  node_count                = 1
+  aks_dns_prefix            = "aksdnsprefix"
+  aks_identity_type         = "UserAssigned"
+  node_pool_abbrevation     = "np"
+  node_pool_profile         = "core"
+  node_pool_instance_count  = 1
+  default_node_name         = "defaultnode"
+  node_pool_name            = "topxnodepool"
+  node_priority             = "Spot"
 }

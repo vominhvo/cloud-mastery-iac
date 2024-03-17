@@ -44,15 +44,15 @@ resource "azurerm_linux_web_app" "app_service" {
   }
 }
 
-# resource "azurerm_app_service_connection" "app_service_connection" {
-#   count              = local.connect_to_db ? 0 : 1
-#   name               = "${var.project_name}-${local.app_service_connection_abbrevation}-${local.app_service_connection_profile}-${var.environment}-${var.location}-${var.instance_count}"
-#   app_service_id     = azurerm_linux_web_app.app_service.id
-#   target_resource_id = var.cosmosdb_account_id
-#   authentication {
-#     type = local.app_service_authentication
-#   }
-# }
+resource "azurerm_app_service_connection" "app_service_connection" {
+  count              = local.connect_to_db ? 0 : 1
+  name               = "${var.project_name}-${local.app_service_connection_abbrevation}-${local.app_service_connection_profile}-${var.environment}-${var.location}-${var.instance_count}"
+  app_service_id     = azurerm_linux_web_app.app_service.id
+  target_resource_id = var.cosmosdb_account_id
+  authentication {
+    type = local.app_service_authentication
+  }
+}
 
 resource "azurerm_app_service_virtual_network_swift_connection" "network" {
   app_service_id = azurerm_linux_web_app.app_service.id
