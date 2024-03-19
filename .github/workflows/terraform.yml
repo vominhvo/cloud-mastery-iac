@@ -16,9 +16,9 @@ env:
 jobs:
   terraform_plan_dev:
     name: 'Terraform Plan dev'
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     environment: develop
-    # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
+    # Use the Bash shell regardless whether the GitHub Actions runner is self-hosted, macos-latest, or windows-latest
     defaults:
       run:
         shell: bash
@@ -57,7 +57,7 @@ jobs:
   terraform_apply_dev:
     name: 'Terraform Apply dev'
     needs: [terraform_plan_dev]
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     environment: develop
     
     defaults:
@@ -86,9 +86,9 @@ jobs:
     if: github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/main'
     needs: [terraform_apply_dev]
     name: 'Terraform Plan Test'
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     environment: develop
-    # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
+    # Use the Bash shell regardless whether the GitHub Actions runner is self-hosted, macos-latest, or windows-latest
     defaults:
       run:
         shell: bash
@@ -128,7 +128,7 @@ jobs:
     if: github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/main'
     name: 'Terraform Apply Test'
     needs: [terraform_plan_test]
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     environment: develop
     
     defaults:
@@ -157,9 +157,9 @@ jobs:
     if: github.ref == 'refs/heads/main'
     needs: [terraform_apply_test]
     name: 'Terraform Plan Prod'
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     environment: develop
-    # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
+    # Use the Bash shell regardless whether the GitHub Actions runner is self-hosted, macos-latest, or windows-latest
     defaults:
       run:
         shell: bash
@@ -199,7 +199,7 @@ jobs:
     if: github.ref == 'refs/heads/main'
     name: 'Terraform Apply Prod'
     needs: [terraform_plan_prod]
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     environment: develop
     
     defaults:
