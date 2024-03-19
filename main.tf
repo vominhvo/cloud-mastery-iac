@@ -20,17 +20,17 @@ resource "azurerm_user_assigned_identity" "user_assigned_identity" {
 }
 
 #config virtual network
-module "network" {
-  source              = "./modules/network"
-  project_name        = local.project_name
-  environment         = local.environment
-  location            = local.location
-  instance_count      = local.instance_count
-  resource_group_name = azurerm_resource_group.this.name
-  combined_vars       = var.vnet_combined_vars
-  list_subnet         = var.list_subnet
-  virtual_ip_address  = var.virtual_ip_address
-}
+# module "network" {
+#   source              = "./modules/network"
+#   project_name        = local.project_name
+#   environment         = local.environment
+#   location            = local.location
+#   instance_count      = local.instance_count
+#   resource_group_name = azurerm_resource_group.this.name
+#   combined_vars       = var.vnet_combined_vars
+#   list_subnet         = var.list_subnet
+#   virtual_ip_address  = var.virtual_ip_address
+# }
 
 # config cosmosDB
 # module "cosmosDB" {
@@ -99,10 +99,10 @@ module "kubernetes" {
   combined_vars          = var.aks_combined_vars
   user_assigned_identity = azurerm_user_assigned_identity.user_assigned_identity.id
 }
-module "k8s" {
-  source                 = "./modules/k8s"
-  host                   = module.kubernetes.host
-  client_certificate     = base64decode(module.kubernetes.client_certificate)
-  client_key             = base64decode(module.kubernetes.client_key)
-  cluster_ca_certificate = base64decode(module.kubernetes.cluster_ca_certificate)
-}
+# module "k8s" {
+#   source                 = "./modules/k8s"
+#   host                   = module.kubernetes.host
+#   client_certificate     = base64decode(module.kubernetes.client_certificate)
+#   client_key             = base64decode(module.kubernetes.client_key)
+#   cluster_ca_certificate = base64decode(module.kubernetes.cluster_ca_certificate)
+# }
