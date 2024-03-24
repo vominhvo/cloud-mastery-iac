@@ -74,6 +74,12 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v3
 
+    # https://github.com/actions/setup-node
+    - name: Install Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '18'
+
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v1
       with:
@@ -103,6 +109,12 @@ jobs:
     # Checkout the repository to the GitHub Actions runner
     - name: Checkout
       uses: actions/checkout@v3
+
+    # https://github.com/actions/setup-node
+    - name: Install Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '18'
 
     # Install the latest version of Terraform CLI and configure the Terraform CLI configuration file with a Terraform Cloud user API token
     - name: Setup Terraform
@@ -145,6 +157,12 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v3
 
+    # https://github.com/actions/setup-node
+    - name: Install Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '18'
+
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v1
       with:
@@ -174,6 +192,12 @@ jobs:
     # Checkout the repository to the GitHub Actions runner
     - name: Checkout
       uses: actions/checkout@v3
+
+    # https://github.com/actions/setup-node
+    - name: Install Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '18'
 
     # Install the latest version of Terraform CLI and configure the Terraform CLI configuration file with a Terraform Cloud user API token
     - name: Setup Terraform
@@ -215,6 +239,12 @@ jobs:
     steps:    
     - name: Checkout
       uses: actions/checkout@v3
+
+    # https://github.com/actions/setup-node
+    - name: Install Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '18'
 
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v1
