@@ -120,6 +120,3 @@ aks_combined_vars = {
   node_pool_instance_count  = 1
 }
 
-variable "github_token" {
-  description = "GitHub Personal Access Token"
-}
