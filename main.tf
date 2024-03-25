@@ -99,11 +99,11 @@ module "kubernetes" {
   combined_vars          = var.aks_combined_vars
   user_assigned_identity = azurerm_user_assigned_identity.user_assigned_identity.id
 }
-module "k8s" {
-  source                 = "./modules/k8s"
-  host                   = module.kubernetes.host
-  client_certificate     = base64decode(module.kubernetes.client_certificate)
-  client_key             = base64decode(module.kubernetes.client_key)
-  cluster_ca_certificate = base64decode(module.kubernetes.cluster_ca_certificate)
-  github_token           = var.github_token
-}
+# module "k8s" {
+#   source                 = "./modules/k8s"
+#   host                   = module.kubernetes.host
+#   client_certificate     = base64decode(module.kubernetes.client_certificate)
+#   client_key             = base64decode(module.kubernetes.client_key)
+#   cluster_ca_certificate = base64decode(module.kubernetes.cluster_ca_certificate)
+#   github_token           = var.github_token
+# }

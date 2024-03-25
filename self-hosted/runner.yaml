@@ -25,11 +25,10 @@ metadata:
   name: dos-box-runner-autoscaler
   namespace: self-hosted-runners
 spec:
-  scaleDownDelaySecondsAfterScaleOut: 300
   scaleTargetRef:
     kind: RunnerDeployment
     name: dos-box-runner
-  minReplicas: 0
+  minReplicas: 1
   maxReplicas: 5
   metrics:
   - type: TotalNumberOfQueuedAndInProgressWorkflowRuns
