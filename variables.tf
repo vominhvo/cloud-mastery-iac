@@ -167,6 +167,3 @@ variable "aks_combined_vars" {
   }
 }
 
-variable "github_token" {
-  description = "GitHub Personal Access Token"
-}
