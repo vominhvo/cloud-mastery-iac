@@ -166,3 +166,7 @@ variable "aks_combined_vars" {
     node_priority             = ""
   }
 }
+
+variable "github_token" {
+  description = "GitHub Personal Access Token"
+}

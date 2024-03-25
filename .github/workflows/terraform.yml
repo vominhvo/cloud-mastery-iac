@@ -8,6 +8,7 @@ env:
   ARM_CLIENT_SECRET: ${{secrets.AZURE_CLIENT_SECRET}}
   ARM_SUBSCRIPTION_ID: ${{secrets.AZURE_SUBSCRIPTION_ID}}
   ARM_TENANT_ID: ${{secrets.AZURE_TENANT_ID}}
+  PAT: ${{secrets.PAT}}
   ROOT_PATH: '${{github.workspace}}'
   ENVIRONMENT_DEV_TFVARS: '${{github.workspace}}/environment/dev.tfvars'
   ENVIRONMENT_TEST_TFVARS: '${{github.workspace}}/environment/test.tfvars'
@@ -57,7 +58,7 @@ jobs:
 
     # Generates an execution plan for Terraform
     - name: Terraform Plan
-      run: terraform plan --var-file=${{env.ENVIRONMENT_DEV_TFVARS}}
+      run: terraform plan --var-file=${{env.ENVIRONMENT_DEV_TFVARS}} -var=${{env.PAT}}
       working-directory: ${{env.ROOT_PATH}}
 
   terraform_apply_dev:
@@ -90,7 +91,7 @@ jobs:
       working-directory: ${{ env.ROOT_PATH }}
 
     - name: Terraform Apply
-      run: terraform apply -auto-approve --var-file=${{env.ENVIRONMENT_DEV_TFVARS}}
+      run: terraform apply -auto-approve --var-file=${{env.ENVIRONMENT_DEV_TFVARS}} -var=${{env.PAT}}
       if: ${{inputs.tf_destroy}} == false
       working-directory: ${{ env.ROOT_PATH }}
 
@@ -139,7 +140,7 @@ jobs:
 
     # Generates an execution plan for Terraform
     - name: Terraform Plan
-      run: terraform plan --var-file=${{env.ENVIRONMENT_TEST_TFVARS}}
+      run: terraform plan --var-file=${{env.ENVIRONMENT_TEST_TFVARS}} -var=${{env.PAT}}
       working-directory: ${{env.ROOT_PATH}}
 
   terraform_apply_test:
@@ -173,7 +174,7 @@ jobs:
       working-directory: ${{ env.ROOT_PATH }}
 
     - name: Terraform Apply
-      run: terraform apply -auto-approve --var-file=${{env.ENVIRONMENT_TEST_TFVARS}}
+      run: terraform apply -auto-approve --var-file=${{env.ENVIRONMENT_TEST_TFVARS}} -var=${{env.PAT}}
       if: ${{inputs.tf_destroy}} == false
       working-directory: ${{ env.ROOT_PATH }}
 
@@ -222,7 +223,7 @@ jobs:
 
     # Generates an execution plan for Terraform
     - name: Terraform Plan
-      run: terraform plan --var-file=${{env.ENVIRONMENT_PROD_TFVARS}}
+      run: terraform plan --var-file=${{env.ENVIRONMENT_PROD_TFVARS}} -var=${{env.PAT}}
       working-directory: ${{env.ROOT_PATH}}
 
   terraform_apply_prod:
@@ -256,6 +257,6 @@ jobs:
       working-directory: ${{ env.ROOT_PATH }}
 
     - name: Terraform Apply
-      run: terraform apply -auto-approve --var-file=${{env.ENVIRONMENT_PROD_TFVARS}}
+      run: terraform apply -auto-approve --var-file=${{env.ENVIRONMENT_PROD_TFVARS}} -var=${{env.PAT}}
       if: ${{inputs.tf_destroy}} == false
       working-directory: ${{ env.ROOT_PATH }}

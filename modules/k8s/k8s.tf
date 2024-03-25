@@ -6,87 +6,107 @@ provider "helm" {
     cluster_ca_certificate = var.cluster_ca_certificate
   }
 }
-provider "kubernetes" {
-  host                   = var.host
-  client_certificate     = var.client_certificate
-  client_key             = var.client_key
-  cluster_ca_certificate = var.cluster_ca_certificate
+resource "helm_repository" "jetstack" {
+  name = "jetstack"
+  url  = "https://charts.jetstack.io"
 }
 
+resource "helm_release" "cert_manager" {
+  repository       = "https://charts.jetstack.io"
+  chart            = "cert-manager"
+  version          = "v1.14.0"
+  name             = "cert-manager"
+  namespace        = "cert-manager"
+  create_namespace = true
+  wait             = true
 
-resource "kubernetes_deployment" "example" {
-  metadata {
-    name = "terraform-example"
-    labels = {
-      test = "MyExampleApp"
-    }
-  }
-
-  spec {
-    replicas = 3
-
-    selector {
-      match_labels = {
-        test = "MyExampleApp"
-      }
-    }
-
-    template {
-      metadata {
-        labels = {
-          test = "MyExampleApp"
-        }
-      }
-
-      spec {
-        container {
-          image = "nginx:1.7.8"
-          name  = "example"
-
-          resources {
-            limits = {
-              cpu    = "0.5"
-              memory = "512Mi"
-            }
-            requests = {
-              cpu    = "250m"
-              memory = "50Mi"
-            }
-          }
-
-          liveness_probe {
-            http_get {
-              path = "/nginx_status"
-              port = 80
-
-              http_header {
-                name  = "X-Custom-Header"
-                value = "Awesome"
-              }
-            }
-
-            initial_delay_seconds = 3
-            period_seconds        = 3
-          }
-        }
-      }
-    }
+  set {
+    name  = "installCRDs"
+    value = "true"
   }
 }
 
-resource "kubernetes_service" "example" {
-  metadata {
-    name = "terraform-example"
-  }
-  spec {
-    selector = {
-      test = "MyExampleApp"
-    }
-    port {
-      port        = 80
-      target_port = 80
-    }
+resource "helm_repository" "actions_runner_controller" {
+  name = "actions-runner-controller"
+  url  = "https://actions-runner-controller.github.io/actions-runner-controller"
+}
 
-    type = "LoadBalancer"
+resource "helm_release" "actions_runner_controller" {
+  name             = "actions-runner-controller"
+  repository       = helm_repository.actions_runner_controller.metadata[0].name
+  chart            = "actions-runner-controller"
+  namespace        = "actions-runner-system"
+  create_namespace = true
+  wait             = true
+
+  set {
+    name  = "authSecret.create"
+    value = "true"
   }
+
+  set {
+    name  = "authSecret.github_token"
+    value = var.github_token
+  }
+}
+
+resource "kubernetes_namespace" "self_hosted_runners" {
+  metadata {
+    name = "self-hosted-runners"
+  }
+}
+
+resource "kubernetes_manifest" "dos_box_runner" {
+  manifest = jsonencode({
+    apiVersion = "actions.summerwind.dev/v1alpha1"
+    kind       = "RunnerDeployment"
+    metadata = {
+      name      = "dos-box-runner"
+      namespace = kubernetes_namespace.self_hosted_runners.metadata[0].name
+    }
+    spec = {
+      replicas = 1
+      template = {
+        spec = {
+          ephemeral  = true
+          repository = "tmtam612/cloud-mastery-iac"
+          tolerations = [
+            {
+              key      = "virtual-kubelet.io/provider"
+              operator = "Exists"
+              effect   = "NoSchedule"
+            }
+          ]
+        }
+      }
+    }
+  })
+}
+
+resource "kubernetes_manifest" "dos_box_runner_autoscaler" {
+  manifest = jsonencode({
+    apiVersion = "actions.summerwind.dev/v1alpha1"
+    kind       = "HorizontalRunnerAutoscaler"
+    metadata = {
+      name      = "dos-box-runner-autoscaler"
+      namespace = kubernetes_namespace.self_hosted_runners.metadata[0].name
+    }
+    spec = {
+      scaleTargetRef = {
+        kind = "RunnerDeployment"
+        name = kubernetes_manifest.dos_box_runner.metadata[0].name
+      }
+      minReplicas = 1
+      maxReplicas = 5
+      metrics = [
+        {
+          type               = "TotalNumberOfQueuedAndInProgressWorkflowRuns"
+          scaleUpThreshold   = "1"
+          scaleDownThreshold = "0"
+          scaleUpFactor      = "2"
+          scaleDownFactor    = "0.5"
+        }
+      ]
+    }
+  })
 }
