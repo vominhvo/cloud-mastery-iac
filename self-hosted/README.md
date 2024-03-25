@@ -38,3 +38,8 @@ cd self-hosted
 kubectl apply -f .\runner.yaml
 
 ```
+
+### Check Runners
+```shell
+kubectl get runners -A
+```
