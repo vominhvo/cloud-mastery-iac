@@ -12,12 +12,8 @@ spec:
   replicas: 1
   template:
     spec:
-      ephemeral: true
+      ephemeral: false
       repository: tmtam612/cloud-mastery-iac
-      tolerations:
-      - key: virtual-kubelet.io/provider
-        operator: "Exists"
-        effect: NoSchedule
 ---
 apiVersion: actions.summerwind.dev/v1alpha1
 kind: HorizontalRunnerAutoscaler
