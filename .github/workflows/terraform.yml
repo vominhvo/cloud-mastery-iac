@@ -256,6 +256,6 @@ jobs:
       working-directory: ${{ env.ROOT_PATH }}
 
     - name: Terraform Apply
-      run: terraform apply -auto-approve --var-file=${{env.ENVIRONMENT_PROD_TFVARS}} -var=${{env.PAT}}
+      run: terraform apply -auto-approve --var-file=${{env.ENVIRONMENT_PROD_TFVARS}}
       if: ${{inputs.tf_destroy}} == false
       working-directory: ${{ env.ROOT_PATH }}
