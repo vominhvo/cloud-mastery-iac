@@ -122,7 +122,3 @@ aks_combined_vars = {
   node_pool_name            = "topxnodepool"
   node_priority             = "Spot"
 }
-
-variable "github_token" {
-  description = "GitHub Personal Access Token"
-}
