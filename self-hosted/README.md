@@ -41,6 +41,6 @@ kubectl apply -f .\runner.yaml
 
 ### Check Runners
 ```shell
-Edit the repository name in RunnerDeployment in runner.yaml
+Edit the repository name in RunnerDeployment in runner.yaml to your custom repository
 kubectl get runners -A
 ```
