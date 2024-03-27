@@ -166,3 +166,4 @@ variable "aks_combined_vars" {
     node_priority             = ""
   }
 }
+

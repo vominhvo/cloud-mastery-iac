@@ -39,10 +39,10 @@ output "kube_config" {
   sensitive = true
 }
 
-resource "azurerm_kubernetes_cluster_node_pool" "example" {
-  name                  = "${var.project_name}-${local.node_pool_abbrevation}-${local.node_pool_profile}-${var.environment}-${var.location}-${var.instance_count}"
-  kubernetes_cluster_id = azurerm_kubernetes_cluster.cluster.id
-  vm_size               = local.vm_size
-  node_count            = 1
-
-}
+#resource "azurerm_kubernetes_cluster_node_pool" "example" {
+#  name                  = "${var.project_name}-${local.node_pool_abbrevation}-${local.node_pool_profile}-${var.environment}-${var.location}-${var.instance_count}"
+#  kubernetes_cluster_id = azurerm_kubernetes_cluster.cluster.id
+#  vm_size               = local.vm_size
+#  node_count            = 1
+#
+#}
