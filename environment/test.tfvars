@@ -119,3 +119,4 @@ aks_combined_vars = {
   node_pool_profile         = "core"
   node_pool_instance_count  = 1
 }
+

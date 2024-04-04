@@ -1,4 +1,4 @@
-test
+
 ### Setup AZ client and brew
 ```shell
 # Install the brew.
