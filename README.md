@@ -35,12 +35,28 @@ brew upgrade hashicorp/tap/terraform
 terraform -help
 ```
 
-### Execute terraform commands
+## Terraform Life Cycle
+```text
+Init -> Validate -> Plan -> Apply -> Destroy
+```
+
+### Execute common terraform commands
 ```shell
-terraform init
+# Usually use this command to format your codes before committing
+terraform fmt
+
+terraform init -backend-config=settings/nonprod.azurerm.tfbackend
+
 terraform validate
+
 terraform plan -var-file=./environment/dev.tfvars
+
 terraform apply -var-file=./environment/dev.tfvars -auto-approve
+```
+
+Pull and store the state
+```text
+terraform state pull >> state.txt
 ```
 
 ### Clean-up
@@ -53,10 +69,7 @@ terraform apply -destroy -var-file=./environment/dev.tfvars -auto-approve
 rm -rf .terraform* & rm -rf terraform.tfstate*
 ```
 
-### Terraform LifeCycle
-```shell
-terraform init -> terraform validate -> terraform plan -> terraform apply -> terraform destroy
-```
+
 
 
 
