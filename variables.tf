@@ -1,3 +1,29 @@
+# The definition of backend - TF resource state management
+variable "TF_STATE_RG_NAME" {
+  type        = string
+  description = "Name of the resource group to manage the state of TF"
+  default     = "topx-rg-backend-nonprod-eastus"
+}
+
+variable "TF_STATE_STORAGE_ACC_NAME" {
+  type        = string
+  description = "Name of the storage account to manage the state of TF"
+  default     = "topxsanonprod"
+}
+
+variable "TF_STATE_STORAGE_CONTAINER_NAME" {
+  type        = string
+  description = "Name of the storage blob container to manage the state of TF"
+  default     = "topx-tfstate-dev"
+}
+
+variable "TF_STATE_STORAGE_CONTAINER_BLOB" {
+  type        = string
+  description = "The name of the Blob used to retrieve/store Terraform's State file inside the Storage Container"
+  default     = "nonprod.terraform.tfstate"
+}
+# End of the definition of backend
+
 variable "project_name" {
   type = string
 }
