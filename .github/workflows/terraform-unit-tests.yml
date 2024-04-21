@@ -1,4 +1,4 @@
-  name: 'Unit Tests'
+  name: 'Terraform Validation'
 
   on:
     push:
@@ -42,3 +42,4 @@
         - name: Terraform Format
           run: terraform fmt -check -recursive
 
+        # TODO: Perform security scan using a static code analysis tool such as Checkov or Trivy
