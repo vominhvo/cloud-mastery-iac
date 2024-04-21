@@ -1,5 +1,5 @@
 
-### Setup AZ client and brew
+### Install Azure CLI
 ```shell
 # Install the brew.
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
@@ -19,28 +19,28 @@ az account set --subscription <subscription-id>
 
 ### Install Terraform client
 ```shell
-#First, install the HashiCorp tap, a repository of all our Homebrew packages.
+# First, install the HashiCorp tap, a repository of all our Homebrew packages.
 brew tap hashicorp/tap
 
-#Now, install Terraform with hashicorp/tap/terraform.
+# Now, install Terraform with hashicorp/tap/terraform.
 brew install hashicorp/tap/terraform
 
-#To update to the latest version of Terraform, first update Homebrew.
+# To update to the latest version of Terraform, first update Homebrew.
 brew update
 
-#Then, run the upgrade command to download and use the latest Terraform version.
+# Then, run the upgrade command to download and use the latest Terraform version.
 brew upgrade hashicorp/tap/terraform
 
 # Verify Terraform installed
 terraform -help
 ```
 
-## Terraform Life Cycle
+### Terraform Life Cycle
 ```text
 Init -> Validate -> Plan -> Apply -> Destroy
 ```
 
-### Execute common terraform commands
+### Execute common Terraform commands
 ```shell
 # Usually use this command to format your codes before committing
 terraform fmt
@@ -54,8 +54,8 @@ terraform plan -var-file=./environment/dev.tfvars
 terraform apply -var-file=./environment/dev.tfvars -auto-approve
 ```
 
-Pull and store the state
-```text
+### Pull and store the state
+```shell
 terraform state pull >> state.txt
 ```
 
@@ -68,8 +68,3 @@ terraform apply -destroy -var-file=./environment/dev.tfvars -auto-approve
 # Delete all state files
 rm -rf .terraform* & rm -rf terraform.tfstate*
 ```
-
-
-
-
-
