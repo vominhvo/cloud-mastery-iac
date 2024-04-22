@@ -13,8 +13,8 @@ jobs:
         uses: actions/checkout@v4
       - run: |
           echo 'Checking Terraform backend state...'
-          echo 'Region: ${env.REGION}'
-          echo 'Resource Group: ${env.COMMON_RESOURCE_GROUP}'
+          echo 'Region: ${REGION}'
+          echo 'Resource Group: ${COMMON_RESOURCE_GROUP}'
           pwd
           ls -al
       - run: bash ${GITHUB_WORKSPACE}/.github/workflows/scripts/init-remote-tf-state.sh
