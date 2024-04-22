@@ -4,11 +4,14 @@ on:
 env:
   REGION: ${{ vars.REGION }}
   RESOURCE_GROUP: ${{ vars.RESOURCE_GROUP }}
+  ARM_TENANT_ID: "${{ secrets.AZURE_TENANT_ID }}"
+  ARM_CLIENT_ID: "${{ secrets.AZURE_CLIENT_ID }}"
+  ARM_SUBSCRIPTION_ID: "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
   ALL_MY_SECRETS: ${{ toJSON(secrets) }}
   ALL_MY_VARS: ${{ toJSON(vars) }}
 jobs:
   terraform-state-init:
-    name: 'Check'
+    name: 'Init State'
     runs-on: ubuntu-latest
     environment: common-nonprod
     steps:
@@ -19,8 +22,6 @@ jobs:
           echo 'Checking Terraform backend state...'
           echo "$ALL_MY_SECRETS"
           echo "$ALL_MY_VARS"
-          echo 'Region: ${REGION}'
-          echo 'Resource Group: ${RESOURCE_GROUP}'
           pwd
           ls -al
       - run: bash ${GITHUB_WORKSPACE}/.github/workflows/scripts/init-remote-tf-state.sh
