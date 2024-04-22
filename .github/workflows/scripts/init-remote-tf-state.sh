@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -e
-
 # Create the resource group
 if  ( `az group exists --resource-group $COMMON_RESOURCE_GROUP` == "true" );
 then
