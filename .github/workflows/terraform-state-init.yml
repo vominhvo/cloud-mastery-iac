@@ -3,14 +3,14 @@ on:
   workflow_dispatch:
 env:
   REGION: ${{ vars.REGION }}
-  COMMON_RESOURCE_GROUP: ${{ vars.COMMON_RESOURCE_GROUP }}
+  RESOURCE_GROUP: ${{ vars.RESOURCE_GROUP }}
   ALL_MY_SECRETS: ${{ toJSON(secrets) }}
   ALL_MY_VARS: ${{ toJSON(vars) }}
 jobs:
   terraform-state-init:
     name: 'Check'
     runs-on: ubuntu-latest
-    environment: test
+    environment: common-nonprod
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -20,7 +20,7 @@ jobs:
           echo "$ALL_MY_SECRETS"
           echo "$ALL_MY_VARS"
           echo 'Region: ${REGION}'
-          echo 'Resource Group: ${COMMON_RESOURCE_GROUP}'
+          echo 'Resource Group: ${RESOURCE_GROUP}'
           pwd
           ls -al
       - run: bash ${GITHUB_WORKSPACE}/.github/workflows/scripts/init-remote-tf-state.sh
