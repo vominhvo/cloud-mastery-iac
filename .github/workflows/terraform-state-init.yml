@@ -10,7 +10,7 @@ jobs:
   terraform-state-init:
     name: 'Check'
     runs-on: ubuntu-latest
-    environment: ${{ vars.ENVIRONMENT_STAGE }}
+    environment: test
     steps:
       - name: Checkout
         uses: actions/checkout@v4
