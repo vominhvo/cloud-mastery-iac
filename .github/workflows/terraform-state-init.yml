@@ -15,7 +15,6 @@ jobs:
           echo 'Checking Terraform backend state...'
           echo ${{ vars.REGION }}
           echo ${{ vars.COMMON_RESOURCE_GROUP }}
-          echo ${{ GITHUB_REGION }}
           pwd
           ls -al
       - run: bash ${GITHUB_WORKSPACE}/.github/workflows/scripts/init-remote-tf-state.sh
