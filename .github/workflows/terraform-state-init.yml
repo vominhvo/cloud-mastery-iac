@@ -4,15 +4,21 @@ on:
 env:
   REGION: ${{ vars.REGION }}
   COMMON_RESOURCE_GROUP: ${{ vars.COMMON_RESOURCE_GROUP }}
+  ALL_MY_SECRETS: ${{ toJSON(secrets) }}
+  ALL_MY_VARS: ${{ toJSON(vars) }}
 jobs:
   terraform-state-init:
     name: 'Check'
     runs-on: ubuntu-latest
+    environment: ${{ vars.ENVIRONMENT_STAGE }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - run: |
+      - name: Print out
+        run: |
           echo 'Checking Terraform backend state...'
+          echo "$ALL_MY_SECRETS"
+          echo "$ALL_MY_VARS"
           echo 'Region: ${REGION}'
           echo 'Resource Group: ${COMMON_RESOURCE_GROUP}'
           pwd
