@@ -11,4 +11,6 @@ jobs:
     steps:
       - run: |
           echo 'Checking Terraform backend state...'
+          pwd
+          ls -al
       - run: bash ${GITHUB_WORKSPACE}/scripts/init-remote-tf-state.sh
