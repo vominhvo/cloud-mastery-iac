@@ -1,10 +1,14 @@
-  on:
-    workflow_dispatch:
-
-  jobs:
-    terraform-state-init:
-      name: 'Backend State'
-      runs-on: ubuntu-latest
-      steps:
-        - run: |
-            echo 'Checking Terraform backend state...'
+name: 'Terraform Backend State'
+on:
+  workflow_dispatch:
+env:
+  REGION: ${{ vars.REGION }}
+  COMMON_RESOURCE_GROUP: ${{ vars.COMMON_RESOURCE_GROUP }}
+jobs:
+  terraform-state-init:
+    name: 'Check'
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo 'Checking Terraform backend state...'
+      - run: bash ${GITHUB_WORKSPACE}/scripts/init-remote-tf-state.sh
