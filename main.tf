@@ -19,11 +19,12 @@ resource "azurerm_user_assigned_identity" "user_assigned_identity" {
   resource_group_name = azurerm_resource_group.this.name
 }
 
-# resource "azurerm_role_assignment" "base" {
-#   scope                = azurerm_resource_group.this.id
-#   role_definition_name = var.user_assigned_role_definition_name
-#   principal_id         = azurerm_user_assigned_identity.user_assigned_identity.principal_id
-# }
+resource "azurerm_role_assignment" "base" {
+  scope                = data.azurerm_resource_group.ip_addresses_resource.id
+  role_definition_name = var.user_assigned_role_definition_name
+  principal_id         = azurerm_user_assigned_identity.user_assigned_identity.principal_id
+}
+
 #config virtual network
 module "network" {
   source                = "./modules/network"
@@ -49,6 +50,8 @@ module "kubernetes" {
   combined_vars          = var.aks_combined_vars
   user_assigned_identity = azurerm_user_assigned_identity.user_assigned_identity.id
   subnet_id              = module.network.subnet1_id
+  public_ip_address      = data.azurerm_public_ip.ip_address.id
+  depends_on             = [azurerm_role_assignment.base]
 }
 module "k8s" {
   source                 = "./modules/k8s"

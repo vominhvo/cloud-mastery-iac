@@ -1,13 +1,13 @@
 #local
 project_name   = "cloud-mastery"
 environment    = "dev"
-region         = "westus3"
+region         = "eastus"
 instance_count = "1"
-
+dns_label      = "cloudmastery"
 #resource group
 resource_group_abbrevation = "rgs"
 resource_group_profile     = "core"
-
+ip_address_resource_group  = "topx-rg-backend-nonprod-eastus"
 #user assigned identity
 user_assigned_identity_abbrevation = "uai"
 user_assigned_identity_profile     = "core"
@@ -117,7 +117,7 @@ aks_combined_vars = {
   kubernetes_instance_count      = 3
   vm_size                        = "standard_b2s"
   node_count                     = 1
-  aks_dns_prefix                 = "aksdnsprefix"
+  aks_dns_prefix                 = "cloudmastery"
   aks_identity_type              = "UserAssigned"
   default_node_name              = "defaultnode"
   node_pool_name                 = "topxnodepool"

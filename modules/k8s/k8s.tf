@@ -44,85 +44,106 @@ resource "null_resource" "local_exec" {
   }
   depends_on = [var.resource_group_name, var.cluster_name]
 }
+
+resource "helm_release" "ingress_nginx" {
+  name             = "ingress-nginx"
+  repository       = "https://kubernetes.github.io/ingress-nginx"
+  chart            = "ingress-nginx"
+  namespace        = "ingress-controller"
+  create_namespace = true
+
+  values = [file("${path.module}/values/ingress.yaml")]
+}
+resource "null_resource" "upgrade_ingress_nginx" {
+  provisioner "local-exec" {
+    command = <<-EOF
+      kubectl label namespace ${local.ingress_namespace} cert-manager.io/disable-validation=true
+    EOF
+  }
+  depends_on = [helm_release.ingress_nginx]
+}
+
+# ingress services 
+resource "null_resource" "ingress_service" {
+  provisioner "local-exec" {
+    command = "kubectl apply -f ${path.module}/yaml/microservices.yaml"
+  }
+
+  depends_on = [helm_release.ingress_nginx, null_resource.local_exec]
+}
+
 resource "helm_release" "cert_manager" {
   name       = local.cert_manager_name
   repository = local.cert_manager_repository
   chart      = local.cert_manager_chart
   version    = local.cert_manager_version
   wait       = local.cert_manager_wait
+  namespace  = local.ingress_namespace
   set {
     name  = local.cert_manager_set_name
     value = local.cert_manager_set_value
   }
-  depends_on = [var.k8s_depends_on, null_resource.local_exec]
+  depends_on = [null_resource.upgrade_ingress_nginx]
 }
 
-resource "helm_release" "actions_runner_controller" {
-  name             = local.actions_runner_controller_name
-  repository       = local.actions_runner_controller_repository
-  chart            = local.actions_runner_controller_chart
-  namespace        = local.actions_runner_controller_namespace
-  create_namespace = local.actions_runner_controller_create_namespace
-  wait             = local.actions_runner_controller_wait
-
-  set {
-    name  = local.actions_runner_controller_set_name
-    value = local.actions_runner_controller_set_value
-  }
-
-  set {
-    name  = local.actions_runner_controller_set_github_name
-    value = local.actions_runner_controller_set_github_value
-  }
-  depends_on = [helm_release.cert_manager]
-}
-
-resource "helm_release" "ingress_nginx" {
-  name             = local.ingress_name
-  repository       = local.ingress_repository
-  chart            = local.ingress_chart
-  namespace        = local.ingress_namespace
-  create_namespace = local.ingress_create_namespace
-}
-
-resource "helm_release" "argocd" {
-  name = local.argocd_name
-
-  repository       = local.argocd_repository
-  chart            = local.argocd_chart
-  namespace        = local.argocd_namespace
-  create_namespace = local.argocd_create_namespace
-  version          = local.argocd_version
-
-  values     = [file("${path.module}/values/argocd.yaml")]
-  depends_on = [helm_release.cert_manager]
-}
-
-# self-hosted runner
-resource "null_resource" "self_hosted_runners" {
+# CA cluster issuer
+resource "null_resource" "cluster_issuer" {
   provisioner "local-exec" {
-    command = "kubectl apply -f ${path.module}/yaml/self-hosted-runner.yaml"
+    command = "kubectl apply -f ${path.module}/yaml/issuer.yaml"
   }
 
-  depends_on = [helm_release.actions_runner_controller, null_resource.local_exec]
-}
-# ArgoCD Bootstrap the app of apps 
-resource "null_resource" "argocd_bootstrap" {
-  provisioner "local-exec" {
-    command = "kubectl apply -f ${path.module}/yaml/argocd.yaml"
-  }
-
-  depends_on = [helm_release.argocd, null_resource.local_exec]
+  depends_on = [null_resource.local_exec, helm_release.cert_manager]
 }
 
-# ingress services 
-resource "null_resource" "ingress_service" {
-  provisioner "local-exec" {
-    command = "kubectl apply -f ${path.module}/yaml/ingress.yaml"
-  }
+# resource "helm_release" "actions_runner_controller" {
+#   name             = local.actions_runner_controller_name
+#   repository       = local.actions_runner_controller_repository
+#   chart            = local.actions_runner_controller_chart
+#   namespace        = local.actions_runner_controller_namespace
+#   create_namespace = local.actions_runner_controller_create_namespace
+#   wait             = local.actions_runner_controller_wait
 
-  depends_on = [helm_release.ingress_nginx, null_resource.local_exec]
-}
+#   set {
+#     name  = local.actions_runner_controller_set_name
+#     value = local.actions_runner_controller_set_value
+#   }
+
+#   set {
+#     name  = local.actions_runner_controller_set_github_name
+#     value = local.actions_runner_controller_set_github_value
+#   }
+#   depends_on = [helm_release.cert_manager]
+# }
+
+# resource "helm_release" "argocd" {
+#   name = local.argocd_name
+
+#   repository       = local.argocd_repository
+#   chart            = local.argocd_chart
+#   namespace        = local.argocd_namespace
+#   create_namespace = local.argocd_create_namespace
+#   version          = local.argocd_version
+
+#   values     = [file("${path.module}/values/argocd.yaml")]
+#   depends_on = [helm_release.cert_manager]
+# }
+
+# # self-hosted runner
+# resource "null_resource" "self_hosted_runners" {
+#   provisioner "local-exec" {
+#     command = "kubectl apply -f ${path.module}/yaml/self-hosted-runner.yaml"
+#   }
+
+#   depends_on = [helm_release.actions_runner_controller, null_resource.local_exec]
+# }
+# # ArgoCD Bootstrap the app of apps 
+# resource "null_resource" "argocd_bootstrap" {
+#   provisioner "local-exec" {
+#     command = "kubectl apply -f ${path.module}/yaml/argocd.yaml"
+#   }
+
+#   depends_on = [helm_release.argocd, null_resource.local_exec]
+# }
 
 # resource "helm_release" "sonarqube_release" {
 #   name = "sonarqube"

@@ -14,11 +14,19 @@ variable "instance_count" {
   type = string
 }
 
+variable "dns_label" {
+  type = string
+}
+
 variable "resource_group_abbrevation" {
   type = string
 }
 
 variable "resource_group_profile" {
+  type = string
+}
+
+variable "ip_address_resource_group" {
   type = string
 }
 

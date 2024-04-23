@@ -21,6 +21,7 @@ locals {
   network_profile_network_plugin = var.combined_vars["network_profile_network_plugin"]
   network_profile_dns_service_ip = var.combined_vars["network_profile_dns_service_ip"]
   network_profile_service_cidr   = var.combined_vars["network_profile_service_cidr"]
+  node_resource_group_name       = "${var.project_name}-${var.environment}-${local.node_pool_name}"
 }
 
 
@@ -44,7 +45,7 @@ resource "azurerm_kubernetes_cluster" "cluster" {
   workload_identity_enabled = local.workload_identity_enabled //enable workload identity
   automatic_channel_upgrade = local.automatic_channel_upgrade
   private_cluster_enabled   = local.private_cluster_enabled
-  node_resource_group       = "${var.project_name}-${var.environment}-${local.node_pool_name}"
+  node_resource_group       = local.node_resource_group_name
 
   tags = {
     env = var.environment
@@ -53,6 +54,9 @@ resource "azurerm_kubernetes_cluster" "cluster" {
     network_plugin = local.network_profile_network_plugin
     dns_service_ip = local.network_profile_dns_service_ip
     service_cidr   = local.network_profile_service_cidr
+    load_balancer_profile {
+      outbound_ip_address_ids = [var.public_ip_address]
+    }
   }
   lifecycle {
     ignore_changes = [default_node_pool[0].node_count] //when auto scaling, node 0 will not be changed
