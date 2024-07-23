@@ -1,12 +1,5 @@
-locals {
-  virtual_network_abbrevation = var.combined_vars["virtual_network_abbrevation"]
-  virtual_network_profile     = var.combined_vars["virtual_network_profile"]
-  subnet_abbrevation          = var.combined_vars["subnet_abbrevation"]
-  subnet1                     = var.combined_vars["subnet1"]
-  subnet2                     = var.combined_vars["subnet2"]
-}
 resource "azurerm_virtual_network" "this" {
-  name                = "${var.project_name}-${local.virtual_network_abbrevation}-${local.virtual_network_profile}-${var.environment}-${var.location}-${var.instance_count}"
+  name                = "${var.project_name}-${var.combined_vars["virtual_network_abbrevation"]}-${var.combined_vars["virtual_network_profile"]}-${var.environment}-${var.location}-${var.instance_count}"
   address_space       = var.main_address_space
   location            = var.location
   resource_group_name = var.resource_group_name
@@ -17,44 +10,42 @@ resource "azurerm_virtual_network" "this" {
 }
 
 resource "azurerm_subnet" "subnet1" {
-  name                 = "${var.project_name}-${local.subnet_abbrevation}-${local.subnet1}-${var.environment}-${var.location}-${var.instance_count}"
+  name                 = "${var.project_name}-${var.combined_vars["subnet_abbrevation"]}-${var.combined_vars["subnet1"]}-${var.environment}-${var.location}-${var.instance_count}"
   address_prefixes     = var.subnet1_address_space
   resource_group_name  = var.resource_group_name
   virtual_network_name = azurerm_virtual_network.this.name
 }
 
-resource "azurerm_subnet" "subnet2" {
-  name                 = "${var.project_name}-${local.subnet_abbrevation}-${local.subnet2}-${var.environment}-${var.location}-${var.instance_count}"
-  address_prefixes     = var.subnet2_address_space
-  resource_group_name  = var.resource_group_name
-  virtual_network_name = azurerm_virtual_network.this.name
-}
-# resource "azurerm_virtual_network" "vnet" {
-#   name                = "${var.project_name}-${local.virtual_network_abbrevation}-${local.virtual_network_profile}-${var.environment}-${var.location}-${var.instance_count}"
-#   address_space       = var.virtual_ip_address
+# resource "azurerm_network_security_group" "nsg" {
+#   name                = "${var.project_name}-${var.combined_vars["nsg_abbrevation"]}-${var.combined_vars["nsg_profile"]}-${var.environment}-${var.location}-${var.instance_count}"
 #   location            = var.location
 #   resource_group_name = var.resource_group_name
 
-#   tags = {
-#     env = var.environment
-#   }
+# security_rule {
+#   name                       = "test123"
+#   priority                   = 100
+#   direction                  = "Inbound"
+#   access                     = "Allow"
+#   protocol                   = "Tcp"
+#   source_port_range          = "*"
+#   destination_port_range     = "*"
+#   source_address_prefix      = "*"
+#   destination_address_prefix = "*"
 # }
 
-# resource "azurerm_subnet" "subnet" {
-#   for_each = {
-#     for index, sn in var.list_subnet :
-#     index => sn
-#   }
-#   name                 = "${var.project_name}-${local.subnet_abbrevation}-${each.value.name}-${var.environment}-${var.location}-${var.instance_count}"
-#   virtual_network_name = azurerm_virtual_network.vnet.name
-#   address_prefixes     = each.value.address_prefix
-#   resource_group_name  = var.resource_group_name
-#   delegation {
-#     name = "subnet-delegation"
+# tags = {
+#   environment = "Production"
+# }
+# }
 
-#     service_delegation {
-#       name    = "Microsoft.Web/serverFarms"
-#       actions = ["Microsoft.Network/virtualNetworks/subnets/action"]
-#     }
-#   }
+# resource "azurerm_subnet_network_security_group_association" "assoc" {
+#   subnet_id                 = azurerm_subnet.subnet1.id
+#   network_security_group_id = azurerm_network_security_group.nsg.id
+# }
+
+# resource "azurerm_subnet" "subnet2" {
+#   name                 = "${var.project_name}-${local.subnet_abbrevation}-${local.subnet2}-${var.environment}-${var.location}-${var.instance_count}"
+#   address_prefixes     = var.subnet2_address_space
+#   resource_group_name  = var.resource_group_name
+#   virtual_network_name = azurerm_virtual_network.this.name
 # }

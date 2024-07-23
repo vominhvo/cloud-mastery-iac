@@ -1,28 +1,40 @@
 #local
-project_name   = "cloud-mastery"
-environment    = "dev"
-region         = "eastus"
-instance_count = "1"
-dns_label      = "cloudmastery"
+project_name           = "topx"
+environment            = "dev"
+region                 = "eastus"
+instance_count         = "1"
+dns_zone               = "topx"
+dns_label              = "topx"
+public_ip_address_name = "topx"
+dns_contributor_role   = "DNS Zone Contributor"
 #resource group
-resource_group_abbrevation = "rgs"
-resource_group_profile     = "core"
-ip_address_resource_group  = "topx-rg-backend-nonprod-eastus"
+resource_group_name         = "topx-rg-backend-nonprod-eastus"
+resource_group_abbrevation  = "rg"
+resource_group_profile      = "core"
+ip_address_resource_group   = "topx-rg-backend-nonprod-eastus"
+backend_storge_account_name = "topxsanonprod"
+backend_container_name      = "letsencrypt-staging"
+backend_blob_name           = "tls-secret.yaml"
+backend_secret_name         = "tls-secret"
+backend_secret_namespace    = "ingress-service"
 #user assigned identity
 user_assigned_identity_abbrevation = "uai"
 user_assigned_identity_profile     = "core"
-user_assigned_role_definition_name = "Network Contributor"
+network_contributor_role           = "Network Contributor"
+default_contributor_role           = "Contributor"
 #vnet
 vnet_combined_vars = {
   virtual_network_abbrevation = "vnet"
   virtual_network_profile     = "core"
+  nsg_abbrevation             = "nsg"
+  nsg_profile                 = "core"
   subnet_abbrevation          = "snet1"
   subnet1                     = "subnet1"
   subnet2                     = "subnet1"
 }
 main_address_space    = ["10.0.0.0/8"]
-subnet1_address_space = ["10.0.0.0/19"]
-subnet2_address_space = ["10.0.32.0/19"]
+subnet1_address_space = ["10.0.32.0/19"]
+subnet2_address_space = ["10.0.128.0/19"]
 list_subnet = [
   {
     name           = "subnet_account_service"
@@ -80,14 +92,14 @@ key_vault_combined_vars = {
   soft_delete_retention_days   = 7
   key_vault_secret_abbrevation = "kvc"
   key_vault_secret_profile     = "core"
-  key_vault_secret_value       = "supersecretvalue"
-  key_vault_key_abbrevation    = "kvk"
-  key_vault_key_profile        = "core"
-  key_vault_key_type           = "RSA"
-  key_vault_key_size           = 2048
-  time_before_expiry           = "P30D"
-  expire_after                 = "P90D"
-  notify_before_expiry         = "P90D"
+  # key_vault_secret_value       = "supersecretvalue"
+  key_vault_key_abbrevation = "kvk"
+  key_vault_key_profile     = "core"
+  key_vault_key_type        = "RSA"
+  key_vault_key_size        = 2048
+  time_before_expiry        = "P30D"
+  expire_after              = "P90D"
+  notify_before_expiry      = "P90D"
 }
 key_permissions     = ["List", "Create", "Delete", "Get", "Purge", "Recover", "Update", "GetRotationPolicy", "SetRotationPolicy"]
 secret_permissions  = ["Get", "List", "Set", "Delete", "Recover", "Backup", "Restore", "Purge"]
@@ -110,6 +122,17 @@ service_bus_combined_vars = {
   sku_name                      = "Standard"
 }
 
+#acr
+acr_combined_vars = {
+  create_acr                = 0
+  project_name_without_dash = "txt"
+  acr_abbrevation           = "acr"
+  acr_profile               = "core"
+  sku                       = "Standard"
+  location                  = "East US"
+  zone_redundancy_enabled   = true
+}
+
 #aks
 aks_combined_vars = {
   aks_abbrevation                = "aks"
@@ -117,10 +140,10 @@ aks_combined_vars = {
   kubernetes_instance_count      = 3
   vm_size                        = "standard_b2s"
   node_count                     = 1
-  aks_dns_prefix                 = "cloudmastery"
+  aks_dns_prefix                 = "topx"
   aks_identity_type              = "UserAssigned"
   default_node_name              = "defaultnode"
-  node_pool_name                 = "topxnodepool"
+  node_pool_name                 = "nodepool"
   node_priority                  = "Spot"
   sku_tier                       = "Free" //change to standard when on production
   oidc_issuer_enabled            = true   //enable openID connect
@@ -138,6 +161,12 @@ aks_combined_vars = {
 
 #k8s
 k8s_combined_vars = {
+  dns_name                                   = "topx.team"
+  dns_name_wildcard                          = "*.topx.team"
+  acme_staging_server_url                    = "https://acme-staging-v02.api.letsencrypt.org/directory"
+  acme_server_url                            = "https://acme-v02.api.letsencrypt.org/directory"
+  email                                      = "tmtam612@gmail.com"
+  defautl_namespace                          = "default"
   cert_manager_name                          = "cert-manager"
   cert_manager_repository                    = "https://charts.jetstack.io"
   cert_manager_chart                         = "cert-manager"
@@ -155,12 +184,14 @@ k8s_combined_vars = {
   actions_runner_controller_set_value        = true
   actions_runner_controller_set_github_name  = "authSecret.github_token"
   actions_runner_controller_set_github_value = "<your-PAT>"
+  actions_runner_controller_installed_flag   = 0
   argocd_name                                = "argocd"
   argocd_repository                          = "https://argoproj.github.io/argo-helm"
   argocd_chart                               = "argo-cd"
-  argocd_namespace                           = "devsecops"
+  argocd_namespace                           = "argocd"
   argocd_create_namespace                    = true
   argocd_version                             = "3.35.4"
+  argocd_installed_flag                      = 0
   ingress_name                               = "ingress-nginx"
   ingress_repository                         = "https://kubernetes.github.io/ingress-nginx"
   ingress_chart                              = "ingress-nginx"

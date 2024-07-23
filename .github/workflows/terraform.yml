@@ -10,6 +10,7 @@ env:
   ARM_TENANT_ID: ${{secrets.AZURE_TENANT_ID}}
   AZURE_CREDENTIALS: ${{secrets.AZURE_CREDENTIALS}}
   ROOT_PATH: '${{github.workspace}}'
+  GITHUB_TOKEN: '${{secrets.PAT}}'
   DEVELOP_WORKPLACE: 'develop'
   ACCEPTANCE_WORKPLACE: 'acceptance'
   PRODUCTION_WORKPLACE: 'production'
@@ -47,11 +48,31 @@ jobs:
       uses: hashicorp/setup-terraform@v1
       with:
         terraform_version: 1.7.3
+        terraform_wrapper: false
 
     - name: Log in with Azure
       uses: azure/login@v1
       with:
-        creds: '${{ secrets.AZURE_CREDENTIALS }}'
+        creds: '${{ env.AZURE_CREDENTIALS }}'
+
+    - name: Set up Python 3.8
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.8
+
+    # - name: Install checkov
+    #   run: pip3 install checkov
+    #   working-directory: ${{env.ROOT_PATH}}
+
+    # - name: Install Trivy
+    #   run: |
+    #     wget https://github.com/aquasecurity/trivy/releases/download/v0.31.3/trivy_0.31.3_Linux-64bit.deb
+    #     sudo dpkg -i trivy_0.31.3_Linux-64bit.deb
+    #   working-directory: ${{env.ROOT_PATH}}
+
+    # - name: Install jq
+    #   run: sudo apt install -y jq
+    #   working-directory: ${{env.ROOT_PATH}}
 
     # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
     - name: Terraform Init
@@ -74,8 +95,20 @@ jobs:
 
     # Generates an execution plan for Terraform
     - name: Terraform Plan
-      run: terraform plan --var-file=${{env.ENVIRONMENT_DEV_TFVARS}}
+      run: terraform plan -var="github_token=${{env.GITHUB_TOKEN}}" --var-file=${{env.ENVIRONMENT_DEV_TFVARS}} --out tfplan.binary
       working-directory: ${{env.ROOT_PATH}}
+
+    - name: Create tfplan.json file
+      run: terraform show -json tfplan.binary | jq > tfplan.json
+      working-directory: ${{env.ROOT_PATH}}
+
+    # - name: Scanning with trivy
+    #   run: trivy conf tfplan.json
+    #   working-directory: ${{env.ROOT_PATH}}
+
+    # - name: Scanning with checkov
+    #   run: checkov -f tfplan.json
+    #   working-directory: ${{env.ROOT_PATH}}
 
   terraform_apply_dev:
     name: 'Terraform Apply dev'
@@ -116,208 +149,226 @@ jobs:
       working-directory: ${{env.ROOT_PATH}}
 
     - name: Terraform Apply
-      run: terraform apply -auto-approve --var-file=${{env.ENVIRONMENT_DEV_TFVARS}}
+      run: terraform apply -auto-approve -var="github_token=${{env.GITHUB_TOKEN}}" --var-file=${{env.ENVIRONMENT_DEV_TFVARS}}
       if: ${{inputs.tf_destroy}} == false
       working-directory: ${{ env.ROOT_PATH }}
 
-  terraform_plan_test:
-    if: github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/main'
-    needs: [terraform_apply_dev]
-    name: 'Terraform Plan Test'
-    runs-on: ubuntu-latest
-    environment: develop
-    # Use the Bash shell regardless whether the GitHub Actions runner is self-hosted, macos-latest, or windows-latest
-    defaults:
-      run:
-        shell: bash
+  # terraform_plan_test:
+  #   if: github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/main'
+  #   needs: [terraform_apply_dev]
+  #   name: 'Terraform Plan Test'
+  #   runs-on: ubuntu-latest
+  #   environment: develop
+  #   # Use the Bash shell regardless whether the GitHub Actions runner is self-hosted, macos-latest, or windows-latest
+  #   defaults:
+  #     run:
+  #       shell: bash
 
-    steps:
-    # Checkout the repository to the GitHub Actions runner
-    - name: Checkout
-      uses: actions/checkout@v3
+  #   steps:
+  #   # Checkout the repository to the GitHub Actions runner
+  #   - name: Checkout
+  #     uses: actions/checkout@v3
 
-    - name: Log in with Azure
-      uses: azure/login@v1
-      with:
-        creds: '${{ secrets.AZURE_CREDENTIALS }}'
+  #   - name: Log in with Azure
+  #     uses: azure/login@v1
+  #     with:
+  #       creds: '${{ secrets.AZURE_CREDENTIALS }}'
 
-    # https://github.com/actions/setup-node
-    - name: Install Node.js
-      uses: actions/setup-node@v2
-      with:
-        node-version: '18'
+  #   # https://github.com/actions/setup-node
+  #   - name: Install Node.js
+  #     uses: actions/setup-node@v2
+  #     with:
+  #       node-version: '18'
 
-    # Install the latest version of Terraform CLI and configure the Terraform CLI configuration file with a Terraform Cloud user API token
-    - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v1
-      with:
-        terraform_version: 1.7.3
+  #   # Install the latest version of Terraform CLI and configure the Terraform CLI configuration file with a Terraform Cloud user API token
+  #   - name: Setup Terraform
+  #     uses: hashicorp/setup-terraform@v1
+  #     with:
+  #       terraform_version: 1.7.3
+  #       terraform_wrapper: false
 
-    # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
-    - name: Terraform Init
-      run: terraform init
-      working-directory: ${{env.ROOT_PATH}}
+  #   # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
+  #   - name: Terraform Init
+  #     run: terraform init
+  #     working-directory: ${{env.ROOT_PATH}}
       
-    - name: Select Workspace
-      run: terraform workspace select ${{env.ACCEPTANCE_WORKPLACE}} || terraform workspace new  ${{env.ACCEPTANCE_WORKPLACE}}
-      working-directory: ${{env.ROOT_PATH}}
+  #   - name: Select Workspace
+  #     run: terraform workspace select ${{env.ACCEPTANCE_WORKPLACE}} || terraform workspace new  ${{env.ACCEPTANCE_WORKPLACE}}
+  #     working-directory: ${{env.ROOT_PATH}}
 
-    # Checks that all Terraform configuration files adhere to a canonical format
-    - name: Terraform Format
-      run: terraform fmt -check
-      working-directory: ${{env.ROOT_PATH}}
+  #   # Checks that all Terraform configuration files adhere to a canonical format
+  #   - name: Terraform Format
+  #     run: terraform fmt -check
+  #     working-directory: ${{env.ROOT_PATH}}
 
-    # Validate all terraform configuation files
-    - name: Terraform Validate
-      run: terraform validate
-      working-directory: ${{env.ROOT_PATH}}
+  #   # Validate all terraform configuation files
+  #   - name: Terraform Validate
+  #     run: terraform validate
+  #     working-directory: ${{env.ROOT_PATH}}
 
-    # Generates an execution plan for Terraform
-    - name: Terraform Plan
-      run: terraform plan --var-file=${{env.ENVIRONMENT_TEST_TFVARS}}
-      working-directory: ${{env.ROOT_PATH}}
+  #   # Generates an execution plan for Terraform
+  #   - name: Terraform Plan
+  #     run: terraform plan --var-file=${{env.ENVIRONMENT_TEST_TFVARS}} --out tfplan.binary
+  #     working-directory: ${{env.ROOT_PATH}}
 
-  terraform_apply_test:
-    if: github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/main'
-    name: 'Terraform Apply Test'
-    needs: [terraform_plan_test]
-    runs-on: ubuntu-latest
-    environment: develop
+  #   - name: Create tfplan.json file
+  #     run: terraform show -json tfplan.binary | jq > tfplan.json
+  #     working-directory: ${{env.ROOT_PATH}}
+
+  #   - name: Scanning
+  #     run: checkov -f tfplan.json
+  #     working-directory: ${{env.ROOT_PATH}}  
+
+  # terraform_apply_test:
+  #   if: github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/main'
+  #   name: 'Terraform Apply Test'
+  #   needs: [terraform_plan_test]
+  #   runs-on: ubuntu-latest
+  #   environment: develop
     
-    defaults:
-      run:
-        shell: bash
+  #   defaults:
+  #     run:
+  #       shell: bash
 
-    steps:    
-    - name: Checkout
-      uses: actions/checkout@v3
+  #   steps:    
+  #   - name: Checkout
+  #     uses: actions/checkout@v3
 
-    - name: Log in with Azure
-      uses: azure/login@v1
-      with:
-        creds: '${{ secrets.AZURE_CREDENTIALS }}'
+  #   - name: Log in with Azure
+  #     uses: azure/login@v1
+  #     with:
+  #       creds: '${{ secrets.AZURE_CREDENTIALS }}'
 
-    # https://github.com/actions/setup-node
-    - name: Install Node.js
-      uses: actions/setup-node@v2
-      with:
-        node-version: '18'
+  #   # https://github.com/actions/setup-node
+  #   - name: Install Node.js
+  #     uses: actions/setup-node@v2
+  #     with:
+  #       node-version: '18'
 
-    - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v1
-      with:
-        terraform_version: 1.7.3
+  #   - name: Setup Terraform
+  #     uses: hashicorp/setup-terraform@v1
+  #     with:
+  #       terraform_version: 1.7.3
 
-    - name: Terraform Init
-      run: terraform init
-      working-directory: ${{ env.ROOT_PATH }}
+  #   - name: Terraform Init
+  #     run: terraform init
+  #     working-directory: ${{ env.ROOT_PATH }}
 
-    - name: Select Workspace
-      run: terraform workspace select ${{env.ACCEPTANCE_WORKPLACE}} || terraform workspace new  ${{env.ACCEPTANCE_WORKPLACE}}
-      working-directory: ${{env.ROOT_PATH}}
+  #   - name: Select Workspace
+  #     run: terraform workspace select ${{env.ACCEPTANCE_WORKPLACE}} || terraform workspace new  ${{env.ACCEPTANCE_WORKPLACE}}
+  #     working-directory: ${{env.ROOT_PATH}}
 
-    - name: Terraform Apply
-      run: terraform apply -auto-approve --var-file=${{env.ENVIRONMENT_TEST_TFVARS}}
-      if: ${{inputs.tf_destroy}} == false
-      working-directory: ${{ env.ROOT_PATH }}
+  #   - name: Terraform Apply
+  #     run: terraform apply -auto-approve --var-file=${{env.ENVIRONMENT_TEST_TFVARS}}
+  #     if: ${{inputs.tf_destroy}} == false
+  #     working-directory: ${{ env.ROOT_PATH }}
 
-  terraform_plan_prod:
-    if: github.ref == 'refs/heads/main'
-    needs: [terraform_apply_test]
-    name: 'Terraform Plan Prod'
-    runs-on: ubuntu-latest
-    environment: develop
-    # Use the Bash shell regardless whether the GitHub Actions runner is self-hosted, macos-latest, or windows-latest
-    defaults:
-      run:
-        shell: bash
+  # terraform_plan_prod:
+  #   if: github.ref == 'refs/heads/main'
+  #   needs: [terraform_apply_test]
+  #   name: 'Terraform Plan Prod'
+  #   runs-on: ubuntu-latest
+  #   environment: develop
+  #   # Use the Bash shell regardless whether the GitHub Actions runner is self-hosted, macos-latest, or windows-latest
+  #   defaults:
+  #     run:
+  #       shell: bash
 
-    steps:
-    # Checkout the repository to the GitHub Actions runner
-    - name: Checkout
-      uses: actions/checkout@v3
+  #   steps:
+  #   # Checkout the repository to the GitHub Actions runner
+  #   - name: Checkout
+  #     uses: actions/checkout@v3
     
-    - name: Log in with Azure
-      uses: azure/login@v1
-      with:
-        creds: '${{ secrets.AZURE_CREDENTIALS }}' 
+  #   - name: Log in with Azure
+  #     uses: azure/login@v1
+  #     with:
+  #       creds: '${{ secrets.AZURE_CREDENTIALS }}' 
 
-    # https://github.com/actions/setup-node
-    - name: Install Node.js
-      uses: actions/setup-node@v2
-      with:
-        node-version: '18'
+  #   # https://github.com/actions/setup-node
+  #   - name: Install Node.js
+  #     uses: actions/setup-node@v2
+  #     with:
+  #       node-version: '18'
 
-    # Install the latest version of Terraform CLI and configure the Terraform CLI configuration file with a Terraform Cloud user API token
-    - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v1
-      with:
-        terraform_version: 1.7.3
+  #   # Install the latest version of Terraform CLI and configure the Terraform CLI configuration file with a Terraform Cloud user API token
+  #   - name: Setup Terraform
+  #     uses: hashicorp/setup-terraform@v1
+  #     with:
+  #       terraform_version: 1.7.3
+  #       terraform_wrapper: false
 
-    # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
-    - name: Terraform Init
-      run: terraform init
-      working-directory: ${{env.ROOT_PATH}}
+  #   # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
+  #   - name: Terraform Init
+  #     run: terraform init
+  #     working-directory: ${{env.ROOT_PATH}}
 
-    - name: Select Workspace
-      run: terraform workspace select ${{env.PRODUCTION_WORKPLACE}} || terraform workspace new  ${{env.PRODUCTION_WORKPLACE}}
-      working-directory: ${{env.ROOT_PATH}}
+  #   - name: Select Workspace
+  #     run: terraform workspace select ${{env.PRODUCTION_WORKPLACE}} || terraform workspace new  ${{env.PRODUCTION_WORKPLACE}}
+  #     working-directory: ${{env.ROOT_PATH}}
 
-    # Checks that all Terraform configuration files adhere to a canonical format
-    - name: Terraform Format
-      run: terraform fmt -check
-      working-directory: ${{env.ROOT_PATH}}
+  #   # Checks that all Terraform configuration files adhere to a canonical format
+  #   - name: Terraform Format
+  #     run: terraform fmt -check
+  #     working-directory: ${{env.ROOT_PATH}}
 
-    # Validate all terraform configuation files
-    - name: Terraform Validate
-      run: terraform validate
-      working-directory: ${{env.ROOT_PATH}}
+  #   # Validate all terraform configuation files
+  #   - name: Terraform Validate
+  #     run: terraform validate
+  #     working-directory: ${{env.ROOT_PATH}}
 
-    # Generates an execution plan for Terraform
-    - name: Terraform Plan
-      run: terraform plan --var-file=${{env.ENVIRONMENT_PROD_TFVARS}}
-      working-directory: ${{env.ROOT_PATH}}
+  #   # Generates an execution plan for Terraform
+  #   - name: Terraform Plan
+  #     run: terraform plan --var-file=${{env.ENVIRONMENT_PROD_TFVARS}} --out tfplan.binary
+  #     working-directory: ${{env.ROOT_PATH}}
 
-  terraform_apply_prod:
-    if: github.ref == 'refs/heads/main'
-    name: 'Terraform Apply Prod'
-    needs: [terraform_plan_prod]
-    runs-on: ubuntu-latest
-    environment: develop
+  #   - name: Create tfplan.json file
+  #     run: terraform show -json tfplan.binary | jq > tfplan.json
+  #     working-directory: ${{env.ROOT_PATH}}
+
+  #   - name: Scanning
+  #     run: checkov -f tfplan.json
+  #     working-directory: ${{env.ROOT_PATH}}
+
+  # terraform_apply_prod:
+  #   if: github.ref == 'refs/heads/main'
+  #   name: 'Terraform Apply Prod'
+  #   needs: [terraform_plan_prod]
+  #   runs-on: ubuntu-latest
+  #   environment: develop
     
-    defaults:
-      run:
-        shell: bash
+  #   defaults:
+  #     run:
+  #       shell: bash
 
-    steps:    
-    - name: Checkout
-      uses: actions/checkout@v3
+  #   steps:    
+  #   - name: Checkout
+  #     uses: actions/checkout@v3
 
-    - name: Log in with Azure
-      uses: azure/login@v1
-      with:
-        creds: '${{ secrets.AZURE_CREDENTIALS }}'
+  #   - name: Log in with Azure
+  #     uses: azure/login@v1
+  #     with:
+  #       creds: '${{ secrets.AZURE_CREDENTIALS }}'
 
-    # https://github.com/actions/setup-node
-    - name: Install Node.js
-      uses: actions/setup-node@v2
-      with:
-        node-version: '18'
+  #   # https://github.com/actions/setup-node
+  #   - name: Install Node.js
+  #     uses: actions/setup-node@v2
+  #     with:
+  #       node-version: '18'
 
-    - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v1
-      with:
-        terraform_version: 1.7.3
+  #   - name: Setup Terraform
+  #     uses: hashicorp/setup-terraform@v1
+  #     with:
+  #       terraform_version: 1.7.3
 
-    - name: Terraform Init
-      run: terraform init
-      working-directory: ${{ env.ROOT_PATH }}
+  #   - name: Terraform Init
+  #     run: terraform init
+  #     working-directory: ${{ env.ROOT_PATH }}
       
-    - name: Select Workspace
-      run: terraform workspace select ${{env.PRODUCTION_WORKPLACE}} || terraform workspace new  ${{env.PRODUCTION_WORKPLACE}}
-      working-directory: ${{env.ROOT_PATH}}
+  #   - name: Select Workspace
+  #     run: terraform workspace select ${{env.PRODUCTION_WORKPLACE}} || terraform workspace new  ${{env.PRODUCTION_WORKPLACE}}
+  #     working-directory: ${{env.ROOT_PATH}}
 
-    - name: Terraform Apply
-      run: terraform apply -auto-approve --var-file=${{env.ENVIRONMENT_PROD_TFVARS}}
-      if: ${{inputs.tf_destroy}} == false
-      working-directory: ${{ env.ROOT_PATH }}
+  #   - name: Terraform Apply
+  #     run: terraform apply -auto-approve --var-file=${{env.ENVIRONMENT_PROD_TFVARS}}
+  #     if: ${{inputs.tf_destroy}} == false
+  #     working-directory: ${{ env.ROOT_PATH }}

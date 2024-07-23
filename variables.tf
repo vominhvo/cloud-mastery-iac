@@ -14,7 +14,28 @@ variable "instance_count" {
   type = string
 }
 
+variable "github_token" {
+  type    = string
+  default = ""
+}
+
+variable "dns_zone" {
+  type = string
+}
+
 variable "dns_label" {
+  type = string
+}
+
+variable "resource_group_name" {
+  type = string
+}
+
+variable "public_ip_address_name" {
+  type = string
+}
+
+variable "dns_contributor_role" {
   type = string
 }
 
@@ -30,6 +51,26 @@ variable "ip_address_resource_group" {
   type = string
 }
 
+variable "backend_storge_account_name" {
+  type = string
+}
+
+variable "backend_container_name" {
+  type = string
+}
+
+variable "backend_blob_name" {
+  type = string
+}
+
+variable "backend_secret_name" {
+  type = string
+}
+
+variable "backend_secret_namespace" {
+  type = string
+}
+
 variable "user_assigned_identity_abbrevation" {
   type = string
 }
@@ -38,7 +79,11 @@ variable "user_assigned_identity_profile" {
   type = string
 }
 
-variable "user_assigned_role_definition_name" {
+variable "network_contributor_role" {
+  type = string
+}
+
+variable "default_contributor_role" {
   type = string
 }
 
@@ -153,7 +198,6 @@ variable "key_opts" {
   type = list(string)
 }
 
-
 variable "service_bus_combined_vars" {
   type = map(string)
   default = {
@@ -165,23 +209,34 @@ variable "service_bus_combined_vars" {
   }
 }
 
+variable "acr_combined_vars" {
+  type = map(string)
+  default = {
+    create_acr                = ""
+    project_name_without_dash = ""
+    acr_abbrevation           = ""
+    acr_profile               = ""
+    sku                       = ""
+    location                  = ""
+    zone_redundancy_enabled   = ""
+  }
+}
+
 variable "aks_combined_vars" {
   type = map(string)
   default = {
-    aks_abbrevation           = ""
-    aks_profile               = ""
-    vm_size                   = ""
-    node_count                = ""
-    aks_dns_prefix            = ""
-    aks_identity_type         = ""
-    network_plugin            = ""
-    kubernetes_instance_count = ""
-    node_pool_instance_count  = ""
-    node_pool_profile         = ""
-    node_pool_abbrevation     = ""
-    default_node_name         = ""
-    node_pool_name            = ""
-    node_priority             = ""
+    aks_abbrevation       = ""
+    aks_profile           = ""
+    vm_size               = ""
+    node_count            = ""
+    aks_dns_prefix        = ""
+    aks_identity_type     = ""
+    network_plugin        = ""
+    node_pool_profile     = ""
+    node_pool_abbrevation = ""
+    default_node_name     = ""
+    node_pool_name        = ""
+    node_priority         = ""
   }
 }
 
